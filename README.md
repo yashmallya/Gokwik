@@ -1,9 +1,21 @@
 # KwikChat
 
-KwikChat is a social-commerce concierge prototype for the GoKwik PM assignment. The product concept is an AI agent that lives inside a chat thread and takes a returning shopper from identity resolution to purchase without forcing them out of the conversation.
+KwikChat is a social-commerce concierge prototype. The product concept is an AI agent that lives inside a chat thread and takes a returning shopper from identity resolution to purchase without forcing them out of the conversation.
 
+## Setup
+
+This prototype is intended to be lightweight and demo-friendly. 
 Visual reference:
-- Stitch prototype: [KwikChat UI reference](https://stitch.withgoogle.com/preview/5496116782317696755?node-id=c6cf254c1c4c40c7be68f951bd2b7932)
+- Stitch prototype (For New User): [KwikChat UI reference](https://stitch.withgoogle.com/preview/5496116782317696755?node-id=c6cf254c1c4c40c7be68f951bd2b7932)
+    For Existing buyers: [KwikChat UI reference](https://stitch.withgoogle.com/preview/5496116782317696755?node-id=cd28523254fb4815805a9b771f0607ef)
+
+### CTA in prototype
+-> Potential Matches 
+-> View Deal (1st product) 
+-> Lock in best deal (Size and merchant are preselected) 
+-> Apply reward and proceed to checkout 
+-> Pay
+
 
 The intended journey covers five moments:
 1. Login and identity recognition
@@ -12,64 +24,10 @@ The intended journey covers five moments:
 4. Loyalty redemption inside chat
 5. Prefilled checkout generation
 
-## Setup
-
-This prototype is intended to be lightweight and demo-friendly. 
-
-## CTA in prototype
--> Potential Matches 
--> View Deal (1st product) 
--> Lock in best deal (Size and merchant are preselected) 
--> Apply reward and proceed to checkout 
--> Pay
-
-
-
-## Architecture Overview
-
-The prototype should be treated as a thin orchestration layer over mocked commerce services.
-
-### 1. Chat UI Layer
-
-Responsibilities:
-    Render the DM-like interface based on the Stitch design reference
-    Capture handle, OTP, image upload, style text, product selection, and loyalty actions
-    Stream assistant turns in a conversational format
-
-
-### 2. Orchestration Layer
-
-Responsibilities:
-    Maintain shopper session state
-    Decide which tool to call next
-    Merge identity context, catalog retrieval, pricing logic, and checkout prep into one thread
-
-
-### 3.  Service and Agentic layers
-    1. Identity Agent: match user handle or account creation via OTP to a shopper profile
-    
-    2. Catalog agent: rank products against input text or photo (Use LLM model to check for best result as per the input across merchants)
-    
-    3. Loyalty service: compute redeemable balance and adjusted payable amount
-    
-    4. Checkout service: generate a locked, prefilled checkout summary with URL
-
-### 4. LLM + Vision Layer
-
-This is where the prototype demonstrates AI reasoning.
-
-Capabilities:
-    Interpret shopper intent from chat text
-    Parse a reference image into visual attributes
-    Retrieve or rank products from the mocked catalog
-    Explain price recommendations clearly
-    Convert a multi-step flow into concise, trustworthy and personalised assistant chat
-
-Suggested model split:
-    Vision-capable model for image understanding plus structured extraction
-    Fast text model for response generation and stateful orchestration
 
 ## End-to-End Flow
+
+DM (Initiation) → Identity → Discovery → Pricing → Rewards → Checkout
 
 ### 1. Login and Identity
 
@@ -127,6 +85,65 @@ Output:
     prefilled address for repeat buyers
     Address form for new user
     locked summary screen or checkout URL
+
+## Edge Case
+I have purposely considered different edge cases, other than the ones shared in the assignment.
+1. Poor Image Quality - The agent can't identify the product due to low quality picture, as per quality of extraction meta - data.
+    Sol. - Graceful Failure. "I can't quite see that—could you send a clearer photo or tell me the brand name?"
+
+2. The Zero Result Sitation - Agent unable to retrieve any product based on user's input.
+    Sol - Based on semantic similarity. Show items user might like instead to keep the impulse alive. Never show an empty state. 
+
+3. Session Loss: The user closes Instagram and comes back 2 hours later.
+    Sol - Persistent State via Redis. The agent should greet them for their last order, or open cart, keeping the context maintained and experience see
+
+
+
+## Architecture Overview
+
+The prototype should be treated as a thin orchestration layer over mocked commerce services.
+
+### 1. Chat UI Layer
+
+Responsibilities:
+    Render the DM-like interface based on the Stitch design reference
+    Capture handle, OTP, image upload, style text, product selection, and loyalty actions
+    Stream assistant turns in a conversational format
+
+
+### 2. Orchestration Layer
+
+Responsibilities:
+    Maintain shopper session state
+    Decide which tool to call next
+    Merge identity context, catalog retrieval, pricing logic, and checkout prep into one thread
+
+
+### 3.  Service and Agentic layers
+    1. Identity Agent: match user handle or account creation via OTP to a shopper profile
+    
+    2. Catalog agent: rank products against input text or photo (Use LLM model to check for best result as per the input across merchants)
+    
+    3. Loyalty agent: compute redeemable balance and adjusted payable amount
+    
+    4. Checkout agent: generate a locked, prefilled checkout summary with URL
+
+### 4. LLM + Vision Layer
+
+This is where the prototype demonstrates AI reasoning.
+
+Capabilities:
+    Interpret shopper intent from chat text
+    Parse a reference image into visual attributes
+    Retrieve or rank products from the mocked catalog
+    Explain price recommendations clearly
+    Convert a multi-step flow into concise, trustworthy and personalised assistant chat
+
+Suggested model split:
+    Vision-capable model for image understanding plus structured extraction
+    Fast text model for response generation and stateful orchestration
+
+
 
 ## LLM Prompts
 
@@ -190,6 +207,7 @@ Make sure all the screens that we have created so far stays in a chat thread and
 
 
 
+### Deterministic VS LLM Logic
 
 Not everything should be delegated to a model.
 
