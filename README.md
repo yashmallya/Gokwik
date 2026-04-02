@@ -41,7 +41,7 @@ Output:
     reward balance
     account creation for new users
 
-### 2. Shop the Look
+### 2. Product Discovery
 
 Input:
     uploaded look image and/or freeform text
